@@ -1,6 +1,8 @@
 # ASP.NET SignalR
 **Konuşmacı:** Yiğit HACIEFENDİOĞLU
 
+![Bilge Adam Ankara Kasım Yazılım Seminer](SeminerSignalR/Content/kasimseminer.jpg)
+
 **Tarih:** 03.11.2018
 
 **Başlangıç - Bitiş Saati:** 14:30 - 15:30
