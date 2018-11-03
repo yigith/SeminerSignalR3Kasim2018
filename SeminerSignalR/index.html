@@ -1,0 +1,132 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <style>
+        #chat {
+            opacity: .5;
+        }
+
+        .top {
+            width: 100px;
+            height: 100px;
+            position: absolute;
+            left: 100px;
+            top: 100px;
+            background-color: black;
+            border-radius: 50%;
+            z-index: 99;
+        }
+
+        .golge {
+            width: 100px;
+            height: 100px;
+            position: absolute;
+            border-radius: 50%;
+            animation: anim;
+            animation-duration: 1s;
+        }
+
+        @keyframes anim {
+            from {
+                background-color: black;
+            }
+
+            to {
+                background-color: white;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="chat">
+        <input type="text" id="message" />
+        <ul id="messages"></ul>
+    </div>
+
+    <div id="toplar">
+        <div class="top"></div>
+    </div>
+
+    <script src="Scripts/jquery-3.3.1.min.js"></script>
+    <script src="Scripts/jquery-ui-1.12.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
+    <script src="Scripts/jquery.signalR-2.3.0.min.js"></script>
+    <script src="signalr/hubs"></script>
+
+    <script>
+        $(function () {
+            // TOP İLE İLGİLİ KISIM
+            var ballHub = $.connection.ballHub;
+            var move = false;
+
+            ballHub.client.moveBall = function (left, top) {
+                // gölge ekleme
+                var offset = $(".top").offset();
+                var golge = $("<div/>")
+                    .addClass("golge")
+                    .css({ left: offset.left + "px", top: offset.top + "px" });
+
+                golge.on("animationend", function (e) {
+                    $(e.target).remove();
+                });
+
+                $("#toplar").append(golge);
+
+                // topu hareket ettirme
+                $(".top").css({ left: left + "px", top: top + "px" });
+            };
+
+
+            $.connection.hub.start().done(function () {
+                $(".top").draggable({
+                    drag: function (e) {
+                        move = true;
+                    }
+                });
+            });
+
+            function sendLocation() {
+                if (move) {
+                    var offset = $(".top").offset();
+                    ballHub.server.move(
+                        Math.round(offset.left),
+                        Math.round(offset.top));
+                    move = false;
+                }
+            }
+
+            setInterval(sendLocation, 66);
+
+            // CHAT İLE İLGİLİ KISIM
+            var chatHub = $.connection.chatHub;
+            var sender = null;
+
+            chatHub.client.broadcastMessage = function (sender, message) {
+                addMessage(sender, message);
+            }
+
+            $.connection.hub.start().done(function () {
+                sender = prompt("İsminiz: ");
+                $("#message").keypress(function (e) {
+                    if (e.keyCode == 13) {
+                        var message = $("#message").val();
+                        chatHub.server.send(sender, message);
+                        addMessage(sender, message);
+                        $("#message").val("");
+                    }
+                });
+            });
+
+            function addMessage(sender, message) {
+                var li = $("<li/>")
+                    .text(message)
+                    .prepend($("<strong/>").text(sender + ": "));
+                $("#messages").append(li);
+            }
+        });
+    </script>
+
+</body>
+</html>
