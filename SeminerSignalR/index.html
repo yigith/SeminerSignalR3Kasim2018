@@ -78,15 +78,6 @@
                 $(".top").css({ left: left + "px", top: top + "px" });
             };
 
-
-            $.connection.hub.start().done(function () {
-                $(".top").draggable({
-                    drag: function (e) {
-                        move = true;
-                    }
-                });
-            });
-
             function sendLocation() {
                 if (move) {
                     var offset = $(".top").offset();
@@ -108,6 +99,13 @@
             }
 
             $.connection.hub.start().done(function () {
+
+                $(".top").draggable({
+                    drag: function (e) {
+                        move = true;
+                    }
+                });
+
                 sender = prompt("İsminiz: ");
                 $("#message").keypress(function (e) {
                     if (e.keyCode == 13) {
